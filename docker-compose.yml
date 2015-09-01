@@ -1,0 +1,62 @@
+xddata:
+  image: mohdaliiqbal/springxd-docker
+  container_name: xddata
+  volumes:
+  - /opt/spring-xd/xd/config
+  - /opt/spring-xd/xd/custom-modules
+  - /opt/spring-xd/xd/data
+  - /data
+  net: "host"
+  command: "true"
+redis:
+  image: redis
+  container_name: redis
+  net: "host"
+  volumes_from:
+  - xddata
+zookeeper:
+  container_name: zookeeper
+  image: springxd/zookeeper
+  net: "host"
+hsqldb:
+  image: springxd/hsqldb
+  container_name: "hsqldb"
+  net: "host"
+rabbitmq:
+  container_name: rabbitmq
+  image: rabbitmq
+  net: "host"
+  ports:
+  - "15672:15672"
+xdadmin:
+  image: mohdaliiqbal/springxd-docker
+  container_name: xdadmin
+  command: xd/bin/xd-admin
+  net: "host"
+  ports:
+  - "9393:9393"
+  env_file: springxd.env
+  volumes_from:
+  - xddata
+xdcontainer1:
+  image: mohdaliiqbal/springxd-docker
+  container_name: container1
+  command: xd/bin/xd-container
+  net: "host"
+  ports:
+  - "8080:8080"
+  - "8081:8081"
+  env_file: springxd.env
+  volumes_from:
+  - xddata
+xdcontainer2:
+  image: mohdaliiqbal/springxd-docker
+  container_name: container2
+  command: xd/bin/xd-container
+  net: "host"
+  ports:
+  - "8090:8080"
+  - "8090:8080"
+  env_file: springxd.env
+  volumes_from:
+  - xddata
