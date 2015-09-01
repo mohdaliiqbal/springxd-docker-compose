@@ -19,6 +19,8 @@ zookeeper:
   container_name: zookeeper
   image: springxd/zookeeper
   net: "host"
+  volumes_from:
+  - xddata
 hsqldb:
   image: springxd/hsqldb
   container_name: "hsqldb"
