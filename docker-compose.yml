@@ -8,6 +8,7 @@ xddata:
   - /data
   net: "host"
   command: "true"
+  user: springxd
 redis:
   image: redis
   container_name: redis
@@ -22,6 +23,7 @@ hsqldb:
   image: springxd/hsqldb
   container_name: "hsqldb"
   net: "host"
+  user: springxd
 rabbitmq:
   container_name: rabbitmq
   image: rabbitmq
@@ -33,6 +35,7 @@ xdadmin:
   container_name: xdadmin
   command: xd/bin/xd-admin
   net: "host"
+  user: springxd
   ports:
   - "9393:9393"
   env_file: springxd.env
@@ -43,6 +46,7 @@ xdcontainer1:
   container_name: container1
   command: xd/bin/xd-container
   net: "host"
+  user: springxd
   ports:
   - "8080:8080"
   - "8081:8081"
@@ -54,6 +58,7 @@ xdcontainer2:
   container_name: container2
   command: xd/bin/xd-container
   net: "host"
+  user: springxd
   ports:
   - "8090:8080"
   - "8090:8080"
