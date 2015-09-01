@@ -17,13 +17,16 @@ redis:
   - xddata
 zookeeper:
   container_name: zookeeper
-  image: springxd/zookeeper
+  image: mohdaliiqbal/springxd-docker
+  working_dir: /opt/spring-xd/zookeeper/bin
+  command: ./zkServer.sh start-foreground
   net: "host"
   volumes_from:
   - xddata
 hsqldb:
-  image: springxd/hsqldb
+  image: mohdaliiqbal/springxd-docker
   container_name: "hsqldb"
+  command: hsqldb/bin/hsqldb-server
   net: "host"
   user: springxd
 rabbitmq:
