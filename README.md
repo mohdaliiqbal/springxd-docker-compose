@@ -1,11 +1,7 @@
 ###Spring-XD Docker Composition
-We at EMC and the federation (VMWare/Pivotal) are using Spring XD heavily on some of our large scale big data projects. It is very easy to setup Spring XD cluster up and running. However, to make it even more simpler to get up an running I was tasked to write a docker compose based spring xd development setup so that developers can just do a *"docker-compose up"* and they are good to go.
+We at EMC and the federation (VMWare/Pivotal) are using Spring XD heavily on some of our large scale big data projects. It is usually sufficient to run singlenode for development, however on many occassion a distributed envrionment is required. To be able to run distribute mode very quickly you can use docker-compose to compose your XD cluster. This github project does exactly that.
 
-Following URL points to a github project which does exactly that.
-
-https://github.com/mohdaliiqbal/springxd-docker-compose
-
-to get up and running with Spring XD on your MacOS follow the steps given below
+To get up and running with Spring XD on your MacOS follow the steps given below
 
 1. Download and install [Docker toolbox](https://www.docker.com/toolbox)
 
@@ -16,7 +12,7 @@ to get up and running with Spring XD on your MacOS follow the steps given below
 4. Change directory to a directory of your choice and run the following commands
     
       >  `cd /Development`
-5. Clone the repository and issue following three commands to create XD cluster
+5. Issue following three commands to create XD cluster
 
       > `git clone https://github.com/mohdaliiqbal/springxd-docker-compose.git`
        
