@@ -1,5 +1,5 @@
 ###Spring-XD Docker Composition
-We at EMC and the federation (VMWare/Pivotal) are using Spring XD heavily on some of our large scale big data projects. It is usually sufficient to run singlenode for development, however on many occassion a distributed envrionment is required. To be able to run distribute mode very quickly you can use docker-compose to compose your XD cluster. This github project does exactly that.
+We at EMC and the federation (VMWare/Pivotal) are using Spring XD heavily on some of our large scale big data projects. It is usually sufficient to run singlenode for development, however on many occassion a distributed envrionment is required. To be able to run distribute mode very quickly you can use docker-compose to compose your XD cluster. This github project does exactly that. The cluster persist its state using a docker volume container and also allows you to scale up the number of XD containers.
 
 To get up and running with Spring XD on your MacOS follow the steps given below
 
@@ -116,21 +116,17 @@ The XD Admin container is the master container. It takes `/opt/spring-xd/xd/conf
 <pre>XD_TRANSPORT=rabbit</pre>
 
 
-#####Spring XD Containers x 2
-The Spring XD containers are configured exactly the same way as the admin. They share the `config` and `custom-module` directories from `xddata` exposed volume, they are launched with `springxd` user, and they are told to take `rabbit` as the default transport layer. Following snippet is for the Spring XD container node 1.
+#####Spring XD Containers
+The Spring XD containers are configured exactly the same way as the admin. They share the `config` and `custom-module` directories from `xddata` exposed volume, they are launched with `springxd` user, and they are told to take `rabbit` as the default transport layer. Following snippet is for the Spring XD container node. The only difference that this service has from the other is the ability to scale up and down on demand. You can do a `docker-compose scale xdcontainer=2` to increase the number of xd-containers. This is useful to test how increasing/decreasing number of container affects your developed modules.
 <pre>
-<b>xdcontainer1:</b>
+<b>xdcontainer:</b>
   <b>image:</b> mohdaliiqbal/springxd-docker
-  <b>container_name:</b> container1
   <b>command:</b> xd/bin/xd-container
   <b>user:</b> springxd
   <b>env_file:</b> springxd.env
   <b>volumes_from:</b>
    - xddata
   <b>net:</b> "host"
-  <b>ports:</b>
-  - "8080:8080"
-  - "8081:8081"
 </pre>
 
 
