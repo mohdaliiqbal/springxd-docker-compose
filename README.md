@@ -38,7 +38,7 @@ Following line is different from official image and is important in the dockerfi
 
 
 ####The Composition
-Coming back to the [docker-compose.yml](https://github.com/mohdaliiqbal/springxd-docker-compose/blob/master/docker-compose.yml). The file defines the containers needed to run the Spring XD in distributed mode with Rabbit transport. All of the containers are configured to take `net:"host"` setting. That allows the containers to talk to each other using the loop back localhost address and make them look like running in one machine. This works very well with the out of the box `server.yml` default settings.
+Coming back to the [docker-compose.yml](https://github.com/mohdaliiqbal/springxd-docker-compose/blob/master/docker-compose.yml). The file defines the containers needed to run the Spring XD in distributed mode with Rabbit transport. All of the containers are linked together using docker-compose links. Since every container has its own IP/hostname, we have to do extra environment settings in the `springxd.env` file. The `springxd.env` file overrides the spring-xd config to point the admin and container nodes to the redis, rabbitmq, zookeeper and hsqldb containers.
 
 #####XDDATA Container
 Lets go through the container defined in the yml. Most importantly ***xddata*** container which is the first container defined in the `docker-compose.yml`.
@@ -51,7 +51,6 @@ Lets go through the container defined in the yml. Most importantly ***xddata*** 
       - /opt/spring-xd/xd/custom-modules
       - /opt/spring-xd/xd/data
       - /data
-      <b>net:</b> "host"
       <b>command:</b> "true"
       <b>user:</b> springxd
 </pre>
@@ -66,7 +65,6 @@ Following snippet configures the redis container. The redis container exposes `/
     <b>redis</b>:
       <b>image:</b> redis
       <b>container_name:</b> redis
-      <b>net:</b> "host"
       <b>volumes_from:</b>
       - xddata
 </pre>   
@@ -79,7 +77,6 @@ Zookeeper container is created and asked to use volumes from `xddata` container.
       <b>image:</b> mohdaliiqbal/springxd-docker
       <b>working_dir:</b> /opt/spring-xd/zookeeper/bin
       <b>command:</b> ./zkServer.sh start-foreground
-      <b>net:</b> "host"
       <b>volumes_from:</b>
       - xddata
 </pre>
@@ -91,7 +88,6 @@ The HSQL Database that comes out of the box is used to hold the Spring XD batch 
       <b>image:</b> mohdaliiqbal/springxd-docker
       <b>container_name:</b> "hsqldb"
       <b>command:</b> hsqldb/bin/hsqldb-server
-      <b>net:</b> "host"
       <b>user:</b> springxd
 </pre>
 
@@ -104,8 +100,13 @@ The XD Admin container is the master container. It takes `/opt/spring-xd/xd/conf
     <b>container_name:</b> xdadmin
     <b>user:</b> springxd
     <b>command:</b> xd/bin/xd-admin
+    <b>links</b>:
+    - "hsqldb"
+    - "xdadmin"
+    - "zookeeper"
+    - "rabbitmq"
+    - "redis"
     <b>env_file:</b> springxd.env
-    <b>net:</b> "host"
     <b>volumes_from:</b>
     - xddata
     <b>ports:</b>
@@ -122,11 +123,16 @@ The Spring XD containers are configured exactly the same way as the admin. They 
 <b>xdcontainer:</b>
   <b>image:</b> mohdaliiqbal/springxd-docker
   <b>command:</b> xd/bin/xd-container
+  <b>links:</b>
+  - "hsqldb"
+  - "xdadmin"
+  - "zookeeper"
+  - "rabbitmq"
+  - "redis"
   <b>user:</b> springxd
   <b>env_file:</b> springxd.env
   <b>volumes_from:</b>
    - xddata
-  <b>net:</b> "host"
 </pre>
 
 
@@ -136,7 +142,6 @@ The Spring XD in this composition uses `rabbit` as its transport layer. Therefor
 <b>rabbitmq:</b>
   <b>container_name:</b> rabbitmq
   <b>image:</b> rabbitmq
-  <b>net:</b> "host"
   <b>ports:</b>
   - "15672:15672"
 </pre>
@@ -162,7 +167,7 @@ The Spring XD in this composition uses `rabbit` as its transport layer. Therefor
 
 > You probably would notice that xddata is a stopped container and it never runs, so how do you modify the data inside it. The volumes inside the xddata container is mapped on to the xdadmin, xdcontainer nodes. You can SSH into any of the mounted containers using the above described way and modify the contents of the files.
 
-> Finally if you want use your MacOS folder as spring xd config or modules folder, then you need to use the following way to define xddata container. The following example maps my local XD installation's config folder to the config folder of the data container (xddata). Now I can modify the servers.yml of my local install and see them take affect in the cluster. Change the `xddata` container definition in the docker-compose.yml file.
+> Finally if you want use your MacOS folder as spring xd config or modules folder, then you need to use the following way to define xddata container. The following example maps my local XD installation's config folder to the config folder of the data container (xddata). Now I can modify the servers.yml of my local install and see them take affect in the cluster.
 
 <pre>
 <b>xddata:</b>
