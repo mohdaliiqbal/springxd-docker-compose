@@ -10,17 +10,17 @@ To get up and running with Spring XD on your MacOS follow the steps given below
 3. Click DOCKER CLI Button at the bottom left
 ![Alt text](./images/docker-cli-launch.png)
 4. Change directory to a directory of your choice and run the following commands
-    
+
       >  `cd /Development`
 5. Issue following three commands to create XD cluster
 
       > `git clone https://github.com/mohdaliiqbal/springxd-docker-compose.git`
-       
+
       >  `cd springxd-docker-compose`
-       
+
       >  `docker-compose up`
 
-**That's it!** 
+**That's it!**
 
 *Note: You will need to wait until all the containers are downloaded to your docker-machine and are boot up.*
 
@@ -31,14 +31,14 @@ You will now see containers in your Kitematic window, note that one container **
 ####How does it work
 The project uses docker-compose yml file to configure various things in the cluster. Most importantly it uses a docker image that is created from my [dockerfile](https://github.com/mohdaliiqbal/springxd-docker/blob/master/Dockerfile) in a separte [github project](https://github.com/mohdaliiqbal/springxd-docker). The Dockerfile is an extension of official [Spring XD image](https://hub.docker.com/r/springxd) [dockerfile](https://hub.docker.com/r/springxd/base/~/dockerfile/) that is managed by [Eric Bottard](https://github.com/ericbottard/). *I may soon do a pull request to see if this new dockerfile can be pulled in official image*.
 
-Following line is different from official image and is important in the dockerfile. It creates folders called `data` and `custom-modules` and under `/opt/spring-xd/xd` folder. We create these folders so that we can expose them as docker-volume from our data container. 
+Following line is different from official image and is important in the dockerfile. It creates folders called `data` and `custom-modules` and under `/opt/spring-xd/xd` folder. We create these folders so that we can expose them as docker-volume from our data container.
 
     RUN mkdir /opt/spring-xd-${XD_VERSION}/xd/data \
     && mkdir /opt/spring-xd-${XD_VERSION}/xd/custom-modules
 
 
 ####The Composition
-Coming back to the [docker-compose.yml](https://github.com/mohdaliiqbal/springxd-docker-compose/blob/master/docker-compose.yml). The file defines the containers needed to run the Spring XD in distributed mode with Rabbit transport. All of the containers are configured to take `net:"host"` setting. That allows the containers to talk to each other using the loop back localhost address and make them look like running in one machine. This works very well with the out of the box `server.yml` default settings. 
+Coming back to the [docker-compose.yml](https://github.com/mohdaliiqbal/springxd-docker-compose/blob/master/docker-compose.yml). The file defines the containers needed to run the Spring XD in distributed mode with Rabbit transport. All of the containers are configured to take `net:"host"` setting. That allows the containers to talk to each other using the loop back localhost address and make them look like running in one machine. This works very well with the out of the box `server.yml` default settings.
 
 #####XDDATA Container
 Lets go through the container defined in the yml. Most importantly ***xddata*** container which is the first container defined in the `docker-compose.yml`.
@@ -57,7 +57,7 @@ Lets go through the container defined in the yml. Most importantly ***xddata*** 
 </pre>
 The above snippet from yml tells docker-compose to create a docker container called xddata from mohdaliiqbal/springxd-docker repository. It exposes 4 volumes, one is the `config` folder, second the `custom-module` folder which will hold the shared custom-modules between all the containers, third the `data` folder which is used by hsqldb and zookeeper to keep their state, and fourth the `/data` which is used by redis container. The
 
-*Disclaimer: RabbitMQ state is not persisted as of now, i will do that once i get some time*. 
+*Disclaimer: RabbitMQ state is not persisted as of now, i will do that once i get some time*.
 
 
 #####Redis Container
@@ -72,7 +72,7 @@ Following snippet configures the redis container. The redis container exposes `/
 </pre>   
 
 #####Zookeeper Container
-Zookeeper container is created and asked to use volumes from `xddata` container. The zookeeper that comes out of the box with spring xd creates data directory in `../xd/data` from the current working directory. Therefore the working directory is modified to suit the start up script and data location. It is done so that it writes to `/opt/spring-xd/xd/data` which is mounted on volume from the `xddata` container. Following snippet configures `zookeeper` container. 
+Zookeeper container is created and asked to use volumes from `xddata` container. The zookeeper that comes out of the box with spring xd creates data directory in `../xd/data` from the current working directory. Therefore the working directory is modified to suit the start up script and data location. It is done so that it writes to `/opt/spring-xd/xd/data` which is mounted on volume from the `xddata` container. Following snippet configures `zookeeper` container.
 <pre>
 <b>zookeeper:</b>
       <b>container_name:</b> zookeeper
@@ -142,7 +142,7 @@ The Spring XD in this composition uses `rabbit` as its transport layer. Therefor
 </pre>
 
 #####Useful Tips:
-- This composition will also allow you to see the aggregated logs of all the nodes in the cluster in one screen if your run the compisition with `docker-compose up`. 
+- This composition will also allow you to see the aggregated logs of all the nodes in the cluster in one screen if your run the compisition with `docker-compose up`.
 
 - You can also run the cluster in the background with `docker-compose up -d` command.
 - If you need to ssh into any of the cluster node, you can use Kitematics and click the `EXEC` button on the top toolbar.
@@ -154,7 +154,7 @@ The Spring XD in this composition uses `rabbit` as its transport layer. Therefor
 
 > `docker-compose rm`
 
-> `docker-machine up` 
+> `docker-machine up`
 
 - To make changes to the configuration there are several things you can do
 
@@ -162,8 +162,19 @@ The Spring XD in this composition uses `rabbit` as its transport layer. Therefor
 
 > You probably would notice that xddata is a stopped container and it never runs, so how do you modify the data inside it. The volumes inside the xddata container is mapped on to the xdadmin, xdcontainer nodes. You can SSH into any of the mounted containers using the above described way and modify the contents of the files.
 
-> Finally if you want use your MacOS folder as spring xd config folder, then you can use Kitematics Volume tab under settings and change the config folder mount point to your folder. Following image describes the same technique
+> Finally if you want use your MacOS folder as spring xd config or modules folder, then you need to use the following way to define xddata container. The following example maps my local XD installation's config folder to the config folder of the data container (xddata). Now I can modify the servers.yml of my local install and see them take affect in the cluster. Change the `xddata` container definition in the docker-compose.yml file.
 
-![Alt text](./images/change-config.png)
-
+<pre>
+<b>xddata:</b>
+  <b>image:</b> mohdaliiqbal/springxd-docker
+  <b>container_name:</b> xddata
+  <b>volumes:</b>
+  - /Users/mohdali/Development/spring-xd-1.2.1.RELEASE/xd/config:/opt/spring-xd-1.2.1.RELEASE/xd/config:ro
+  - /Users/mohdali/Development/spring-xd-1.2.1.RELEASE/xd/custom-modules:/opt/spring-xd-1.2.1.RELEASE/xd/custom-modules
+  - /Users/mohdali/Applications/spring-xd-1.2.1.RELEASE/xd/modules:/opt/spring-xd-1.2.1.RELEASE/xd/modules:ro
+  - /opt/spring-xd-1.2.1.RELEASE/xd/data
+  - /data
+  <b>command:</b> "true"
+  <b>user:</b> springxd
+</pre>
 You are welcome to create issues and PR on the project to make it more useful for other non-trivial use cases.

@@ -2,17 +2,16 @@ xddata:
   image: mohdaliiqbal/springxd-docker
   container_name: xddata
   volumes:
-  - /opt/spring-xd/xd/config
-  - /opt/spring-xd/xd/custom-modules
-  - /opt/spring-xd/xd/data
+  - /opt/spring-xd-1.2.1.RELEASE/xd/config
+  - /opt/spring-xd-1.2.1.RELEASE/xd/custom-modules
+  - /opt/spring-xd-1.2.1.RELEASE/xd/data
   - /data
-  net: "host"
+  - /opt/spring-xd-1.2.1.RELEASE/xd/modules:ro
   command: "true"
   user: springxd
 redis:
   image: redis
   container_name: redis
-  net: "host"
   volumes_from:
   - xddata
 zookeeper:
@@ -20,26 +19,27 @@ zookeeper:
   image: mohdaliiqbal/springxd-docker
   working_dir: /opt/spring-xd/zookeeper/bin
   command: ./zkServer.sh start-foreground
-  net: "host"
   volumes_from:
   - xddata
 hsqldb:
   image: mohdaliiqbal/springxd-docker
   container_name: "hsqldb"
   command: hsqldb/bin/hsqldb-server
-  net: "host"
   user: springxd
 rabbitmq:
   container_name: rabbitmq
-  image: rabbitmq
-  net: "host"
+  image: mohdaliiqbal/rabbitmq-docker
   ports:
   - "15672:15672"
 xdadmin:
   image: mohdaliiqbal/springxd-docker
   container_name: xdadmin
   command: xd/bin/xd-admin
-  net: "host"
+  links:
+  - "hsqldb"
+  - "zookeeper"
+  - "rabbitmq"
+  - "redis"
   user: springxd
   ports:
   - "9393:9393"
@@ -49,7 +49,12 @@ xdadmin:
 xdcontainer:
   image: mohdaliiqbal/springxd-docker
   command: xd/bin/xd-container
-  net: "host"
+  links:
+  - "hsqldb"
+  - "xdadmin"
+  - "zookeeper"
+  - "rabbitmq"
+  - "redis"
   user: springxd
   ports:
   - "8080:8080"
