@@ -114,7 +114,13 @@ The XD Admin container is the master container. It takes `/opt/spring-xd/xd/conf
 </pre>
 
 <i>Variable in springxd.env file.</i>
-<pre>XD_TRANSPORT=rabbit</pre>
+<pre>
+XD_TRANSPORT=rabbit
+HSQL_SERVER_HOST=hsqldb
+SPRING_REDIS_HOST=redis
+SPRING_RABBITMQ_ADDRESSES=rabbitmq:5672
+ZK_CLIENT_CONNECT=zookeeper:2181
+</pre>
 
 
 #####Spring XD Containers
