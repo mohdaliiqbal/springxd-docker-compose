@@ -1,5 +1,5 @@
 ###Spring-XD Docker Composition
-We at EMC and the federation (VMWare/Pivotal) are using Spring XD heavily on some of our large scale big data projects. It is usually sufficient to run singlenode for development, however on many occassion a distributed envrionment is required. To be able to run distribute mode very quickly you can use docker-compose to compose your XD cluster. This github project does exactly that. The cluster persist its state using a docker volume container and also allows you to scale up the number of XD containers.
+It is usually sufficient to run singlenode for development, however on many occassion a distributed envrionment is required. To be able to run distribute mode very quickly you can use docker-compose to compose your XD cluster. This github project does exactly that. The cluster persist its state using a docker volume container and also allows you to scale up the number of XD containers.
 
 To get up and running with Spring XD on your MacOS follow the steps given below
 
